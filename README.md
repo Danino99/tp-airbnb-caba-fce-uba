@@ -11,8 +11,8 @@ esa sensibilidad?
 
 ## Integrantes
 
-- [Nombre 1] · Registro [N°] · GitHub: [@usuario1]
-- [Nombre 2] · Registro [N°] · GitHub: [@usuario2]
+- [Daniel Quezada] · Registro [N°921316] · GitHub: [@Danino99]
+- [Matias Mallon] · Registro [N°921268] · GitHub: [@matimallon1]
 
 ## Dataset
 
