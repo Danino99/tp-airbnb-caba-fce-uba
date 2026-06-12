@@ -1,0 +1,128 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage[document]{ragged2e} % Alineación general a la izquierda con separación silábica
+\geometry{a4paper, margin=2.5cm}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    {\scshape\LARGE Universidad de Buenos Aires \par}
+    \vspace{1cm}
+    {\scshape\Large Facultad de Ciencias Económicas\par}
+    \vspace{0.2cm}
+    {\large Tecnicatura Universitaria en Gestión y Análisis de Datos\par}
+    
+    \vspace{2cm}
+    
+    {\Huge\bfseries Dinámica Temporal y Viralidad en YouTube\par}
+    \vspace{0.5cm}
+    {\Large Aplicación de Derivadas e Integrales Numéricas en Series de Tiempo\par}
+    
+    \vspace{9cm}
+    
+    \begin{flushleft}
+    {\large \textbf{Autores:} Daniel Quezada, Matias Mallon\par}
+    \vspace{0.2cm}
+    {\large \textbf{Materia:} Laboratorio de Métodos Cuantitativos Aplicados a la Gestión\par}
+    \vspace{0.2cm}
+    {\large \textbf{Fecha:} Junio 2026\par}
+    \end{flushleft}
+\end{titlepage}
+
+\begin{abstract}
+\noindent El presente trabajo investiga la dinámica temporal de los videos virales en YouTube mediante la aplicación de derivadas e integrales numéricas sobre series de tiempo. Utilizando un conjunto de datos filtrado de las tendencias de YouTube en seis países, se analizaron los ciclos de vida de los contenidos de mayor alcance. Los resultados demuestran que la viralidad global opera bajo ciclos ultracortos: los videos alcanzan su máxima velocidad de propagación (peak) en una mediana de dos días desde su ingreso al ranking, seguidos de un decaimiento gradual. Adicionalmente, contrario a la hipótesis inicial, la inercia del canal emisor no se asocia con un mayor alcance mediano: las medianas resultan notablemente similares entre canales establecidos y emergentes dentro del top 50 por país, lo cual sugiere que el filtro de éxito propio del ranking equipara ambas categorías. La concentración geográfica del mercado emerge como un factor más determinante que el tamaño demográfico absoluto.
+\end{abstract}
+
+\vspace{0.5cm}
+\noindent\textbf{Repositorio de GitHub:} \url{https://github.com/Danino99/tp-youtube-virales-fce-uba}
+
+\vspace{1cm}
+
+\newpage
+
+\section{Introducción}
+La economía de la atención es una de las industrias más determinantes del siglo XXI. En plataformas basadas en recomendación algorítmica y descubrimiento orgánico como YouTube, el ciclo de vida de un contenido dicta no solo su impacto cultural, sino su viabilidad comercial. Entender cómo crece y decae la atención sobre piezas de contenido resulta fundamental para informar decisiones de marketing, gestión editorial y modelos de negocio basados en publicidad.
+
+Este trabajo práctico se propone modelar cuantitativamente la adopción masiva de contenidos digitales. Inicialmente, el proyecto contemplaba un análisis de elasticidad sobre el mercado inmobiliario (datos de Airbnb), el cual debió ser descartado por inviabilidad técnica en la fuente original. Como alternativa superadora, se optó por un análisis longitudinal de consumo audiovisual.
+
+La pregunta central que guía esta investigación es: \textit{¿Cómo evoluciona la popularidad de los videos virales de YouTube en el tiempo, y qué características del canal, contenido o región se asocian con curvas de crecimiento más explosivas o vidas más prolongadas en el ranking?}
+
+\section{Datos y Metodología}
+\subsection{Descripción del Conjunto de Datos}
+El análisis se basó en el dataset \textit{``Trending YouTube Video Statistics''}, que recopila instantáneas diarias de los rankings de tendencias. Para garantizar la eficiencia computacional y la relevancia del estudio, se aplicó un preprocesamiento que restringió la muestra a datos posteriores al 1 de enero de 2024, abarcando seis mercados clave: Estados Unidos (US), Gran Bretaña (GB), España (ES), México (MX), Brasil (BR) y Argentina (AR). El conjunto resultante contiene más de 266.000 observaciones diarias correspondientes a más de 100.000 videos únicos.
+
+Las variables principales utilizadas fueron: \texttt{view\_count} (visualizaciones acumuladas), \texttt{snapshot\_date} (fecha de la observación), \texttt{publish\_date} (fecha de publicación) y métricas de interacción (\texttt{like\_count}, \texttt{comment\_count}).
+
+\subsection{Transformaciones y Modelo Cuantitativo}
+Se convirtió la estructura transversal de los datos a series temporales individuales por video. Para cada video válido (con un mínimo de 5 días de presencia en el ranking), se reconstruyó la curva discreta de visualizaciones acumuladas $V(t)$, donde $t$ representa los días desde la primera observación.
+
+Para modelar la dinámica viral, se aplicaron los conceptos matemáticos desarrollados en la unidad 4 del curso:
+\begin{enumerate}
+    \item \textbf{Derivada Numérica:} Se estimó la tasa de crecimiento diario (velocidad de viralización) calculando la derivada de $V(t)$ respecto al tiempo, utilizando el método de diferencias centrales (\texttt{np.gradient}).
+    \item \textbf{Suavizado:} Debido al ruido inherente de los conteos diarios, la derivada fue suavizada mediante una convolución con un kernel rectangular (promedio móvil de 5 días), aislando así la tendencia subyacente.
+    \item \textbf{Integral Numérica:} El alcance total generado por el video durante su estadía en el ranking fue aproximado calculando el área bajo la curva de la derivada suavizada mediante la regla del trapecio (\texttt{np.trapz}).
+\end{enumerate}
+
+Estas métricas permitieron identificar empíricamente el \textit{``día del peak''} (el momento $t$ donde la derivada suavizada alcanza su máximo local) y clasificar las curvas según su explosividad e inercia. El análisis dinámico se aplicó sobre los 50 videos con mayor \texttt{view\_count} final en cada país, totalizando 300 series temporales.
+
+\section{Resultados}
+
+\subsection{Capa 1: Dinámica Típica y Ciclos Ultracortos}
+El análisis revela que la viralidad en la élite global de YouTube funciona bajo un paradigma de explosión temprana. A diferencia del contenido ``evergreen'' de nicho, los videos en tendencias muestran un ciclo de vida ultracorto: la mediana del día del peak de la derivada suavizada es de dos días desde la primera observación en el ranking, con un rango entre 0 y 5 días.
+
+Al observar la Figura 1 (Edad del video y vistas acumuladas), se constata que la inmensa mayoría de los videos que logran un alto volumen de reproducciones tienen una edad inferior a los 15 días desde su publicación. Esto confirma empíricamente que el consumo masivo se rige por la inmediatez: la ventana de oportunidad para capturar la atención del público global se concentra fuertemente en las primeras dos semanas de vida del contenido.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{edad_vs_view_count.png}
+    \caption{Relación entre la edad del video (días transcurridos desde su publicación) y las vistas acumuladas. Se observa una concentración masiva de los virales en la franja temporal de 0 a 15 días.}
+    \label{fig:edad_view_count}
+\end{figure}
+
+\subsection{Capa 2: Inercia del Canal y Comportamiento Regional}
+Al realizar un cruce analítico de las métricas dinámicas respecto al tamaño del canal emisor (Figura 2, panel derecho), los resultados resultan contra-intuitivos frente a la hipótesis original. Las medianas de alcance total son notablemente similares entre canales ``establecidos'' (19,6 millones) y ``emergentes'' (17,6 millones), con un ratio de apenas 1,1x. Esto indica que la inercia previa de un canal no garantiza un mayor alcance medio; los escasos videos emergentes que penetran el top 50 ya vienen fuertemente apalancados por su propio éxito orgánico. Cabe destacar que esta comparación estadística presenta limitaciones debido a un fuerte desbalance muestral (281 videos establecidos frente a solo 19 emergentes).
+
+Geográficamente, el estudio expone una asimetría estructural en el alcance generado (Figura 2, panel izquierdo): España lidera la mediana de alcance total entre los top 50 con aproximadamente 50 millones de vistas por video durante su presencia en el ranking, seguido por Argentina y México en posiciones intermedias. Brasil queda en la base de la tabla. Cabe destacar que la duración mediana en el ranking es prácticamente uniforme entre países (entre 5 y 6 días), por lo que las diferencias de alcance no provienen de mayor permanencia sino de una mayor velocidad de crecimiento durante la ventana de exposición. Este resultado sugiere que la concentración de la atención del público en mercados específicos como el español es más determinante que el tamaño demográfico absoluto del mercado.
+
+Finalmente, el análisis de correlaciones (Spearman) entre las métricas dinámicas y los ratios de engagement reveló que la correlación más fuerte se da entre el ratio de comentarios y el alcance total, con un valor de $-0.399$. Esta correlación negativa sugiere que los videos con mayor proporción de comentarios respecto a vistas (típicamente contenidos controversiales o de debate) tienden a tener menor alcance masivo que los videos con interacción más superficial.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{peak_vs_alcance.png}
+    \caption{Distribución del alcance total generado (escala log), comparando mercados geográficos (izquierda) y envergadura del canal emisor (derecha).}
+    \label{fig:peak_vs_alcance}
+\end{figure}
+
+\section{Conclusiones}
+
+Los hallazgos de este estudio pueden resumirse en tres puntos clave:
+\begin{enumerate}
+    \item \textbf{Ciclos de vida ultracortos:} No existe una viralidad sostenida de largo plazo en las tendencias de la élite global. El consumo masivo funciona mediante explosiones cortas: la mediana del día del peak es de dos días desde la primera observación, y los videos ingresan al ranking en una mediana de un día desde su publicación. La ventana completa de adopción masiva se concentra en menos de 15 días.
+    \item \textbf{El mito de la inercia del canal:} Contrario a lo esperado, tener un canal establecido no garantiza un mayor alcance masivo promedio. Las medianas son muy similares entre canales establecidos (19,6M) y emergentes (17,6M), con un ratio de apenas 1,1x. Si bien la muestra de emergentes es reducida (19 videos vs. 281 establecidos), los resultados sugieren que el propio filtro del top 50 equipara ambas categorías.
+    \item \textbf{Concentración del mercado vs. tamaño demográfico:} La concentración de la atención del público (como en el caso de España, que lidera en alcance mediano con aproximadamente 50 millones) resulta más determinante que el tamaño demográfico absoluto del mercado (como Estados Unidos, que queda en posición intermedia). Los videos en mercados más concentrados acumulan mayor volumen de vistas durante su ventana de exposición a pesar de tener duraciones similares en el ranking.
+\end{enumerate}
+
+\textbf{Limitaciones:} El uso exclusivo del ranking de tendencias introduce un claro sesgo de supervivencia, omitiendo el análisis del contenido de largo plazo que crece sin entrar en los \textit{charts}. Adicionalmente, el corte diario de los datos limita la fidelidad de las derivadas, perdiéndose la micro-dinámica intradiaria. Por último, la categorización de canales (``establecidos'' vs ``emergentes'') es heurística, basándose solo en frecuencia, y presenta un severo desbalance de clases que limita su robustez comparativa.
+
+\textbf{Posibles extensiones:} Sería de alto interés académico contrastar matemáticamente la ``curva de caída'' observada en YouTube con la de plataformas de recomendación puramente algorítmicas (como TikTok), para evaluar si el formato de consumo pasivo modifica la pendiente de decaimiento. Asimismo, sería pertinente ajustar funciones teóricas continuas (gamma o log-normales) a las series empíricas para proyectar el alcance total a partir de los primeros dos días observados.
+
+\section{Reflexión Metodológica}
+El desarrollo del presente trabajo integró la Inteligencia Artificial de forma exhaustiva, estructurando un flujo de trabajo asimétrico pero sumamente eficaz mediante dos agentes distintos:
+
+\begin{itemize}
+    \item \textbf{Rol Estratégico y de Auditoría (Claude):} Se utilizó un modelo LLM para la conceptualización inicial y el control de calidad. Durante la fase temprana, una auditoría técnica conjunta reveló la inviabilidad del dataset original de Airbnb debido a datos faltantes críticos. El modelo actuó como contraparte analítica para pivotar racionalmente el tema hacia YouTube, asegurando que el nuevo enfoque cumpliera con el rigor matemático exigido por la cátedra sin incurrir en tautologías metodológicas.
+    \item \textbf{Rol Operativo y de Ejecución (IDE con Agentes IA):} Se empleó un entorno de desarrollo integrado (IDE) potenciado por agentes de inteligencia artificial que orquestaron la ejecución del código. Este sistema tradujo el documento de planificación en código Python, cruzó la información de los datasets, ejecutó las celdas en entornos aislados de manera programática y generó las exportaciones gráficas automatizadas.
+\end{itemize}
+
+Este esquema dual permitió separar la responsabilidad de la toma de decisiones metodológicas de la escritura del código sintáctico, emulando la estructura de revisión por pares (\textit{Senior Analyst} vs \textit{Data Engineer}) y garantizando la autonomía interpretativa del grupo humano.
+
+\end{document}
