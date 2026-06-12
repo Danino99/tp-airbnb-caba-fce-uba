@@ -27,6 +27,17 @@
 ## Concepto de la materia aplicado
 Cálculo de derivadas e integrales numéricas sobre series temporales para modelar la velocidad de crecimiento (aceleración de vistas y métricas de *engagement*) y el alcance total (área bajo la curva) de cada contenido de video.
 
+### Métodos numéricos utilizados
+
+- *Derivada numérica* (np.gradient): calcula la tasa de cambio del view_count
+  por día para cada video, identificando la velocidad de crecimiento.
+- *Suavizado por convolución* (np.convolve con kernel rectangular de 5 días):
+  reduce el ruido de las derivadas antes de localizar el peak. Patrón
+  metodológico tomado del notebook 09 del curso.
+- *Integral discreta* (np.trapz): calcula el área bajo la curva de
+  incremento diario, representando el alcance total generado durante la
+  presencia del video en el ranking.
+
 ## Entrega
 - **Cierre de entrega:** Jueves 11 de junio de 2026, 19:00 h.
 - **Defensa oral:** Viernes 12 de junio.
